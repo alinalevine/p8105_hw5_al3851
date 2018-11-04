@@ -1,0 +1,26 @@
+---
+title: "p8105_hw5_al3851"
+author: "Alina Levine"
+date: "November 3, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+
+```
+
+
+```{r}
+
+study_df = 
+  tibble(file = str_c("./Data/", list.files("./Data"))) %>%
+  mutate(data = map(.x = file, read_csv)) %>%
+  bind_rows %>%
+  unnest() %>%
+  mutate(group = ifelse())
+  
+
+```
+
