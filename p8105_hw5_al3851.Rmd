@@ -8,10 +8,14 @@ output: html_document
 ```{r setup, include=FALSE}
 
 library(tidyverse)
+library(httr)
+library(rvest)
 
 ```
 
-#Create Dataframe
+#Problem 1
+
+##Create Dataframe
 
 I am first making a tibble with one column that consists of the file name for each person. then I am mapping over each file name and am applying the read_csv function, which will give me a list with the value each week for each person. I will replace give with "con" in the file name the value of "control" for group and all other people will get experimental. 
 ```{r create dataframe, resul}
@@ -46,3 +50,51 @@ study_df =
 
 
 The value for people in the experimental groups tends to increase over time, while the value for people in the control group does not increase over time. In fact, it looks as though the value tends to decrease slightly over time for the control group. 
+
+#Problem 2
+
+```{r}
+
+homicide_df = read_csv("homicide-data.csv")
+
+```
+ There were a total of `r nrow(homicide_df)` recorded homicides. Data i s collected for the reported data, name of the victim, age of the victim, sex of the victom, the race of the victim, the city of the murder with latitude and longitute, and the status of the case.
+ 
+ 
+#Summary for each city 
+```{r}
+homicide_city = homicide_df %>%
+  mutate(city_state = str_c(city, state, sep = ",")) %>%
+  group_by(city_state, disposition) %>%
+  count() %>%
+  ungroup() %>%
+  mutate(disposition = recode(disposition, `Closed without arrest` = "unsolved", `Open/No arrest` = "unsolved", `Closed by arrest` = "solved")) %>%
+  group_by(city_state, disposition) %>%
+  summarize(n = sum(n))
+
+
+```
+ 
+ 
+#Baltimore Unsolved Murders
+
+```{r}
+
+homicide_baltimore = homicide_city %>%
+  filter(city_state =="Baltimore,MD")
+
+balt_phat = homicide_baltimore %>%
+  mutate(phat = n/sum(n))
+
+balt_unsolved_phat = balt_unsolved$n/sum(homicide_baltimore$n)
+
+balt_prop_test = prop.test(filter(homicide_baltimore, disposition == "unsolved")$n, sum(homicide_baltimore$n))
+
+
+balt_prop_test %>%
+  broom::tidy() %>%
+  select(estimate, conf.low, conf.high)
+```
+
+ 
+ 
