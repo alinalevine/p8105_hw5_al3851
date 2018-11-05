@@ -81,20 +81,52 @@ homicide_city = homicide_df %>%
 ```{r}
 
 homicide_baltimore = homicide_city %>%
-  filter(city_state =="Baltimore,MD")
-
-balt_phat = homicide_baltimore %>%
-  mutate(phat = n/sum(n))
-
-balt_unsolved_phat = balt_unsolved$n/sum(homicide_baltimore$n)
-
-balt_prop_test = prop.test(filter(homicide_baltimore, disposition == "unsolved")$n, sum(homicide_baltimore$n))
+  filter(city_state == "Baltimore,MD")
 
 
-balt_prop_test %>%
-  broom::tidy() %>%
-  select(estimate, conf.low, conf.high)
+prop.test_list = function(n_success, total){
+      broom::tidy(prop.test(n_success, total ))
+}
+
+
+balt_prop_test = homicide_baltimore %>%
+  mutate(total_homicides = sum(n)) %>%
+  filter(disposition == "unsolved") %>%
+  mutate(p_hat = list(prop.test_list(n, total_homicides))) %>%
+  unnest() %>%
+  select(city_state, estimate, conf.low, conf.high)
+
+
+
+city_unsolved = homicide_city %>%
+  group_by(city_state) %>%
+  mutate(total_homicides = sum(n)) %>%
+  ungroup() %>%
+  filter(disposition == "unsolved") %>%
+  mutate(proportion_estimation = map2(.x = n, .y = total_homicides, ~prop.test_list(n_success = .x,total = .y))) %>%
+  unnest() %>%
+  select(city_state, estimate, conf.low, conf.high)
+  
 ```
+
+
+#Unsolved Murder Proportion Estimate Plot
+
+```{r}
+
+city_unsolved %>%
+  mutate(city_state = fct_reorder(city_state, estimate)) %>%
+  ggplot((aes(x = city_state, y = estimate))) +
+    geom_errorbar(aes(ymin = conf.low, ymax=conf.high), width=.1) +
+    geom_point() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    labs(title = "Unsolved Murder Proportion By City",
+         x = "City",
+         y = "Proportion Estimate")
+
+
+```
+
 
  
  
