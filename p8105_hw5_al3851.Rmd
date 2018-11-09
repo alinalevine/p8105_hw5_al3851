@@ -38,7 +38,7 @@ study_df =
 
 ```
 
-#Outcome Spaghetti Plot
+##Outcome Spaghetti Plot
 
 ```{r spaghetti plot, results = "hide", warning = FALSE, message = FALSE}
 
@@ -54,7 +54,7 @@ The value for people in the experimental groups tends to increase over time, whi
 
 #Problem 2
 
-#Homicide Data Import
+##Homicide Data Import
 
 ```{r import homicide, results = "hide", message = FALSE, warning = FALSE}
 
